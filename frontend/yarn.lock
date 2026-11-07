@@ -1856,9 +1856,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"better-mas-tools-frontend@workspace:.":
+"5in1autocheckin-frontend@workspace:.":
   version: 0.0.0-use.local
-  resolution: "better-mas-tools-frontend@workspace:."
+  resolution: "5in1autocheckin-frontend@workspace:."
   dependencies:
     "@ant-design/icons-vue": "npm:^7.0.1"
     "@types/node": "npm:22.17.1"
