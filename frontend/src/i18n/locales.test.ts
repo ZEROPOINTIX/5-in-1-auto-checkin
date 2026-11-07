@@ -58,9 +58,8 @@ function namespacesOf(messages: Messages): Set<string> {
 }
 
 describe('i18n 词表', () => {
-  // 与 i18n/index.ts 的挂载方式保持一致：standalone 整体挂在 standalone 命名空间下，
-  // onboarding 另在顶层暴露一份给引导组件直接取用。
-  const messages: Messages = { standalone, onboarding: standalone.onboarding, ...zhCN }
+  // 与 i18n/index.ts 的挂载方式保持一致：standalone 整体挂在 standalone 命名空间下。
+  const messages: Messages = { standalone, ...zhCN }
   const known = new Set(flatten(messages))
   const namespaces = namespacesOf(messages)
 

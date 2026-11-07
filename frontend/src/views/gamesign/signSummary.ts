@@ -48,6 +48,25 @@ export function summarizeSignResults(accounts: SignAccountOut[], today: string) 
   return { success, failed, pending }
 }
 
+/** 取本组今天已成功分项中最晚的执行时间，格式化为 yyyy年MM月dd日HH:mm。 */
+export function formatLatestSuccessAt(accounts: SignAccountOut[], today: string): string {
+  const times: string[] = []
+  for (const account of accounts) {
+    for (const step of getAccountSignSteps(account)) {
+      if (!today || step.signedAt?.slice(0, 10) !== today) continue
+      if (step.status !== '成功' && step.status !== '已签到') continue
+      if (step.signedAt) times.push(step.signedAt)
+    }
+  }
+  if (!times.length) return ''
+  const latest = times.sort().at(-1) ?? ''
+  // signedAt 形如 2026-11-07T21:30:00+08:00（ISO 8601 北京时间）
+  const match = /^(\d{4})-(\d{2})-(\d{2})T(\d{2}):(\d{2})/.exec(latest)
+  if (!match) return ''
+  const [, year, month, day, hour, minute] = match
+  return `${year}年${month}月${day}日${hour}:${minute}`
+}
+
 export function getSignSummaryState(counts: ReturnType<typeof summarizeSignResults>) {
   if (counts.failed) return counts.success ? 'partial' : 'failed'
   if (counts.pending || !counts.success) return 'pending'

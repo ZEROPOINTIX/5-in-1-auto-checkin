@@ -10,6 +10,12 @@ const props = defineProps<{
   captchaId?: string
   gt?: string
   challenge?: string
+  /** 自定义验证页；缺省沿用库街区的极验验证页，皎皎角传阿里云验证页 */
+  page?: string
+  /** 自定义 iframe sandbox；皎皎角滑块需要弹窗/表单能力，故单独放宽 */
+  sandbox?: string
+  /** 阿里云验证码的 clientType；官方 App 通道要传 android，网页端不传 */
+  clientType?: string
 }>()
 const emit = defineEmits<{ close: []; solved: [solution: Record<string, string>] }>()
 const { t } = useI18n()
@@ -20,6 +26,7 @@ const failed = ref(false)
 const ready = ref(false)
 const pageLoaded = ref(false)
 const failureReason = ref('standalone.captchaFailed')
+const failureDetail = ref('')
 let loadTimer: ReturnType<typeof setTimeout> | undefined
 const reload = () => {
   clearTimeout(loadTimer)
@@ -28,21 +35,24 @@ const reload = () => {
   ready.value = false
   pageLoaded.value = false
   failureReason.value = 'standalone.captchaFailed'
+  failureDetail.value = ''
   // iframe 自身脚本若被拦截，也必须结束等待并提供重试入口。
   loadTimer = setTimeout(() => {
     failureReason.value = pageLoaded.value
       ? 'standalone.captchaNetworkFailed'
       : 'standalone.captchaBackendFailed'
+    failureDetail.value = 'timeout'
     failed.value = true
-    logger.warn(t(failureReason.value))
+    logger.warn(t(failureReason.value) + ' [timeout]')
   }, 25000)
 }
 const source = computed(
   () =>
-    `/captcha.html#${encodeURIComponent(
+    `${props.page || '/captcha.html'}#${encodeURIComponent(
       JSON.stringify({
         version: props.version,
         captchaId: props.captchaId,
+        clientType: props.clientType,
         gt: props.gt,
         challenge: props.challenge,
         nonce: nonce.value,
@@ -91,12 +101,13 @@ function receive(event: MessageEvent) {
     return
   }
   if ('error' in data) {
-    failureReason.value =
-      'reason' in data && data.reason === 'policy'
-        ? 'standalone.captchaPolicyFailed'
-        : 'standalone.captchaNetworkFailed'
+    const reason = 'reason' in data && typeof data.reason === 'string' ? data.reason : ''
+    failureReason.value = reason.startsWith('policy')
+      ? 'standalone.captchaPolicyFailed'
+      : 'standalone.captchaNetworkFailed'
+    failureDetail.value = reason
     failed.value = true
-    logger.warn(t(failureReason.value))
+    logger.warn(t(failureReason.value) + (reason ? ` [${reason}]` : ''))
     return
   }
   if (!('solution' in data) || !data.solution || typeof data.solution !== 'object') return
@@ -126,7 +137,12 @@ onBeforeUnmount(() => {
     @cancel="emit('close')"
   >
     <a-space v-if="failed" direction="vertical" class="captcha-error">
-      <a-alert type="error" show-icon :message="t(failureReason)" />
+      <a-alert
+        type="error"
+        show-icon
+        :message="t(failureReason)"
+        :description="failureDetail || undefined"
+      />
       <a-button @click="reload">{{ t('standalone.retry') }}</a-button>
     </a-space>
     <a-spin v-if="open && !failed" :spinning="!ready">
@@ -134,7 +150,7 @@ onBeforeUnmount(() => {
         :key="nonce"
         ref="frame"
         :src="source"
-        :sandbox="isAndroidLocal ? 'allow-scripts' : 'allow-scripts allow-same-origin'"
+        :sandbox="sandbox || (isAndroidLocal ? 'allow-scripts' : 'allow-scripts allow-same-origin')"
         class="captcha-frame"
         :title="t('standalone.humanVerification')"
       />

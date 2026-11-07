@@ -4,9 +4,21 @@ import { useI18n } from 'vue-i18n'
 import { message, Modal } from 'ant-design-vue'
 import { HolderOutlined, PlusOutlined, ReloadOutlined } from '@ant-design/icons-vue'
 import draggable from 'vuedraggable'
-import type { AccountOut, StatusOut } from '@/api'
+import type { AccountOut, SignAccountOut, StatusOut } from '@/api'
 import { useCommunityApi, errorMessage } from '@/composables/useCommunityApi'
 import { usePerformanceStore } from '@/stores/performance'
+import {
+  JJJ_PLATFORM,
+  beijingToday,
+  jjjAvailable,
+  jjjConfigured,
+  jjjToSignAccount,
+  readJjjCredentials,
+  readJjjResults,
+  writeJjjCredential,
+  writeJjjResults,
+  type JjjCredential,
+} from './jiaojiaojiao'
 import AccountEditor from './components/AccountEditor.vue'
 import SignResults from './components/SignResults.vue'
 import MiyousheVerificationPanel from './MiyousheVerificationPanel.vue'
@@ -23,6 +35,13 @@ const ordering = ref(false)
 const error = ref('')
 const selected = ref<AccountOut | null>(null)
 const editorOpen = ref(false)
+const jjjCreds = ref<Record<string, JjjCredential>>({})
+const jjjResults = ref<Record<string, SignAccountOut[]>>({})
+const today = computed(() => status.value?.today || beijingToday())
+const results = computed<Record<string, SignAccountOut[]>>(() => ({
+  ...(status.value?.results ?? {}),
+  ...jjjResults.value,
+}))
 const busy = computed(
   () => signing.value || status.value?.running === true || status.value?.activityRunning === true
 )
@@ -43,6 +62,8 @@ const load = async () => {
     if (!alive) return
     accounts.value = accountResponse.data
     status.value = statusResponse
+    jjjCreds.value = readJjjCredentials()
+    jjjResults.value = readJjjResults(today.value)
   } catch (cause) {
     error.value = errorMessage(cause, t('standalone.loadFailed'))
   } finally {
@@ -110,12 +131,50 @@ const reorder = async () => {
     ordering.value = false
   }
 }
+/** 第五个社区：与后端四社区同一次点击并行执行，结果并入签到详情面板。 */
+const runJjjSigns = async () => {
+  if (!jjjAvailable()) return
+  const day = today.value
+  const credentials = readJjjCredentials()
+  const targets = accounts.value.filter(
+    account => account.data.Enabled !== false && jjjConfigured(account.uid, credentials)
+  )
+  if (!targets.length) {
+    jjjResults.value = {}
+    writeJjjResults(day, {})
+    return
+  }
+  const group: SignAccountOut[] = []
+  for (const account of targets) {
+    const credential = credentials[account.uid]
+    const alias = account.data.Name || account.uid
+    try {
+      const result = await window.bmatJjj!.sign(credential)
+      if (result.token && result.token !== credential.token) {
+        writeJjjCredential(account.uid, { ...credential, token: result.token })
+      }
+      group.push(jjjToSignAccount(alias, account.uid, result))
+    } catch (cause) {
+      group.push(
+        jjjToSignAccount(alias, account.uid, {
+          ok: false,
+          message: cause instanceof Error ? cause.message : String(cause),
+          signedAt: `${day}T00:00:00+08:00`,
+          steps: [],
+        })
+      )
+    }
+  }
+  jjjResults.value = { [JJJ_PLATFORM]: group }
+  writeJjjResults(day, jjjResults.value)
+}
 const sign = async () => {
   signing.value = true
   try {
-    await api.sign()
-  } catch (cause) {
-    message.error(errorMessage(cause, t('standalone.signFailed')))
+    await Promise.all([
+      api.sign().catch(cause => message.error(errorMessage(cause, t('standalone.signFailed')))),
+      runJjjSigns(),
+    ])
   } finally {
     signing.value = false
     await load()
@@ -182,6 +241,16 @@ const sign = async () => {
                     )
                   }}</span
                 >
+                <span :class="{ configured: jjjConfigured(account.uid, jjjCreds) }"
+                  >{{ t('standalone.jiaojiaojiao') }} ·
+                  {{
+                    t(
+                      jjjConfigured(account.uid, jjjCreds)
+                        ? 'standalone.configured'
+                        : 'standalone.emptyCredential'
+                    )
+                  }}</span
+                >
               </div>
             </div>
             <a-tag v-if="!account.data.Enabled">{{ t('standalone.disabled') }}</a-tag>
@@ -198,7 +267,7 @@ const sign = async () => {
       </draggable>
     </a-spin>
     <MiyousheVerificationPanel :busy="busy" @completed="load" />
-    <SignResults :results="status?.results ?? {}" :today="status?.today ?? ''" />
+    <SignResults :results="results" :today="today" />
     <AccountEditor
       :open="editorOpen"
       :account="selected"

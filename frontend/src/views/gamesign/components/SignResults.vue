@@ -2,7 +2,12 @@
 import { computed } from 'vue'
 import { useI18n } from 'vue-i18n'
 import type { SignAccountOut } from '@/api'
-import { getAccountSignSteps, getSignSummaryState, summarizeSignResults } from '../signSummary'
+import {
+  formatLatestSuccessAt,
+  getAccountSignSteps,
+  getSignSummaryState,
+  summarizeSignResults,
+} from '../signSummary'
 import { usePerformanceStore } from '@/stores/performance'
 
 const props = defineProps<{ results: Record<string, SignAccountOut[]>; today: string }>()
@@ -10,10 +15,20 @@ const { t } = useI18n()
 const performance = usePerformanceStore()
 // 原始中文状态来自社区结果契约，不能翻译后参与判定。
 const isSuccess = (status: string | undefined) => status === '成功' || status === '已签到'
-const summary = (accounts: SignAccountOut[]) => {
+type SummaryText = string | { prefix: string; day: string; suffix: string }
+const summary = (accounts: SignAccountOut[]): SummaryText => {
   const counts = summarizeSignResults(accounts, props.today)
   if (!counts.success && !counts.failed) return t('standalone.todayPending')
-  if (!counts.failed && !counts.pending) return t('standalone.todayAllSuccess')
+  if (!counts.failed && !counts.pending) {
+    const stamp = formatLatestSuccessAt(accounts, props.today)
+    if (!stamp) return t('standalone.signAllSuccess')
+    // 用占位符拆开 i18n 模板，把「xx日」单独包成高亮片段，其余文案不写死。
+    const marker = '\u0001'
+    const [before = '', after = ''] = t('standalone.todayAllSuccess', { time: marker }).split(marker)
+    const parts = /^(\d{4}年\d{2}月)(\d{2}日)(\d{2}:\d{2})$/.exec(stamp)
+    if (!parts) return t('standalone.todayAllSuccess', { time: stamp })
+    return { prefix: before + parts[1], day: parts[2], suffix: parts[3] + after }
+  }
   if (counts.failed && counts.success) return t('standalone.todayPartialFailure', counts)
   return t('standalone.todaySummary', counts)
 }
@@ -46,9 +61,12 @@ const groups = computed(() =>
     />
     <a-collapse v-else :default-active-key="Object.keys(results)">
       <a-collapse-panel v-for="group in groups" :key="group.platform" :header="group.platform">
-        <template #extra
-          ><span class="platform-summary">{{ group.summary }}</span></template
-        >
+        <template #extra>
+          <span class="platform-summary">
+            <template v-if="typeof group.summary === 'string'">{{ group.summary }}</template>
+            <template v-else>{{ group.summary.prefix }}<strong class="day-highlight">{{ group.summary.day }}</strong>{{ group.summary.suffix }}</template>
+          </span>
+        </template>
         <div v-for="account in group.accounts" :key="account.account_uid" class="result-account">
           <div class="result-account-header">
             <strong>{{ account.account_alias }}</strong>
@@ -114,6 +132,19 @@ const groups = computed(() =>
   color: var(--ant-color-primary);
   font-size: 12px;
   font-weight: 400;
+}
+/* 把日期单独做成琥珀色标签，方便一眼确认「今天到底签了没」。 */
+.day-highlight {
+  display: inline-block;
+  margin: 0 2px;
+  padding: 0 4px;
+  border-radius: 4px;
+  background: var(--ant-color-warning-bg, #fffbe6);
+  color: var(--ant-color-warning-text, #d46b08);
+  font-size: 14px;
+  font-weight: 800;
+  line-height: 1.5;
+  box-shadow: inset 0 0 0 1px var(--ant-color-warning-border, #ffe58f);
 }
 .result-account + .result-account {
   margin-top: 16px;

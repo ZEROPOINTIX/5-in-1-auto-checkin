@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, onBeforeUnmount, onMounted, ref, watch } from 'vue'
+import { computed, onBeforeUnmount, onMounted, ref } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useRoute, useRouter } from 'vue-router'
 import { connectSession, LoginRequiredError } from '@/services/session'
@@ -7,8 +7,6 @@ import { errorMessage } from '@/composables/useCommunityApi'
 import { useSettingsStore } from '@/stores/settings'
 import { useTheme } from '@/composables/useTheme'
 import { isAndroidLocal, markAndroidReady, retryAndroidEngine } from '@/services/android'
-import { setDesktopLightMode } from '@/services/desktop'
-import OnboardingWizard from '@/components/OnboardingWizard.vue'
 import {
   BookOutlined,
   CalendarOutlined,
@@ -23,7 +21,6 @@ import {
 } from '@ant-design/icons-vue'
 import zhCN from 'ant-design-vue/es/locale/zh_CN'
 
-const ONBOARDING_KEY = 'bmat-onboarding-done'
 const { t } = useI18n()
 const route = useRoute()
 const router = useRouter()
@@ -37,28 +34,6 @@ const loginRequired = ref(false)
 const password = ref('')
 const loginError = ref('')
 const startupStage = ref('')
-const onboardingOpen = ref(false)
-const openOnboarding = () => {
-  onboardingOpen.value = true
-}
-// 设置页“重新查看引导”通过此事件重开首启向导。
-window.addEventListener('bmat-open-onboarding', openOnboarding)
-const markOnboardingDone = () => {
-  try {
-    localStorage.setItem(ONBOARDING_KEY, '1')
-  } catch {
-    /* 存储不可用时每次启动都显示，不影响使用 */
-  }
-}
-const maybeOpenOnboarding = () => {
-  let done = false
-  try {
-    done = localStorage.getItem(ONBOARDING_KEY) === '1'
-  } catch {
-    done = false
-  }
-  if (!done) openOnboarding()
-}
 // 底部导航：游戏社区为主入口 + 系统工具；功能页在左侧可收起侧边栏。
 const mobileItems = computed(() => [
   { path: '/sign', label: t('standalone.sign'), icon: CalendarOutlined },
@@ -90,13 +65,6 @@ const pageTitle = computed(() => {
   const meta = route.meta.title as string | undefined
   return meta ? t(meta) : t('standalone.sign')
 })
-// 轻量模式开关同步给桌面壳（托盘驻留/窗口销毁）；非桌面端为空实现。
-watch(
-  () => settings.data?.LightMode,
-  enabled => {
-    if (enabled !== undefined) setDesktopLightMode(enabled)
-  }
-)
 const connect = async () => {
   if (loading.value) return
   if (isAndroidLocal) retryAndroidEngine()
@@ -107,7 +75,6 @@ const connect = async () => {
     await settings.load()
     ready.value = true
     markAndroidReady()
-    maybeOpenOnboarding()
   } catch (cause) {
     if (cause instanceof LoginRequiredError) loginRequired.value = true
     else {
@@ -135,7 +102,6 @@ onMounted(() => {
 onBeforeUnmount(() => {
   window.removeEventListener('bmat-engine-reset', resetEngine)
   window.removeEventListener('bmat-engine-stage', updateStartupStage)
-  window.removeEventListener('bmat-open-onboarding', openOnboarding)
 })
 </script>
 
@@ -295,11 +261,6 @@ onBeforeUnmount(() => {
         </a-menu-item>
       </a-menu>
     </a-drawer>
-    <OnboardingWizard
-      :open="onboardingOpen && ready"
-      @close="onboardingOpen = false"
-      @done="markOnboardingDone"
-    />
   </a-config-provider>
 </template>
 

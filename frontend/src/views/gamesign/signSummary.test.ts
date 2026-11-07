@@ -1,5 +1,10 @@
 import { describe, expect, it } from 'vitest'
-import { getAccountSignSteps, getSignSummaryState, summarizeSignResults } from './signSummary'
+import {
+  formatLatestSuccessAt,
+  getAccountSignSteps,
+  getSignSummaryState,
+  summarizeSignResults,
+} from './signSummary'
 
 describe('今日签到整体情况', () => {
   it('成功和已签到均算成功，风控保留失败', () => {
@@ -123,6 +128,19 @@ describe('今日签到整体情况', () => {
     const counts = summarizeSignResults([account], '2026-09-11')
     expect(counts).toEqual({ success: 0, failed: 1, pending: 0 })
     expect(getSignSummaryState(counts)).toBe('failed')
+  })
+
+  it('全部成功时显示本组今天最晚的执行时间', () => {
+    const accounts = [
+      {
+        games: [
+          { status: '成功', signedAt: '2026-11-07T08:05:00+08:00' },
+          { status: '已签到', signedAt: '2026-11-07T21:30:00+08:00' },
+        ],
+      },
+    ]
+    expect(formatLatestSuccessAt(accounts, '2026-11-07')).toBe('2026年11月07日21:30')
+    expect(formatLatestSuccessAt(accounts, '2026-11-08')).toBe('')
   })
 
   it('昨天的分项成功不能显示为今天全部成功', () => {

@@ -6,7 +6,6 @@ import type { SettingsData } from '@/api'
 import { useSettingsStore } from '@/stores/settings'
 import { errorMessage } from '@/composables/useCommunityApi'
 import { isAndroidLocal } from '@/services/android'
-import { isDesktop } from '@/services/desktop'
 import { createSettingsAutoSave } from './settingsAutoSave'
 
 const { t } = useI18n()
@@ -28,9 +27,6 @@ const captchaModes = computed(() => [
 const themes = computed(() =>
   ['light', 'dark', 'system'].map(value => ({ value, label: t(`standalone.${value}`) }))
 )
-const reopenOnboarding = () => {
-  window.dispatchEvent(new CustomEvent('bmat-open-onboarding'))
-}
 const autoSave = createSettingsAutoSave({
   getSnapshot: () => draft.value,
   save: next => settings.save(next),
@@ -91,16 +87,6 @@ onBeforeUnmount(autoSave.dispose)
             :label="t('standalone.glassEffect')"
             :extra="t('standalone.glassEffectHint')"
             ><a-switch v-model:checked="draft.GlassEffect" @change="changed"
-          /></a-form-item>
-          <a-form-item name="onboarding" :label="t('standalone.onboardingReopen')" :extra="t('standalone.onboardingReopenHint')">
-            <a-button @click="reopenOnboarding">{{ t('standalone.onboardingReopen') }}</a-button>
-          </a-form-item>
-          <a-form-item
-            v-if="isDesktop"
-            name="LightMode"
-            :label="t('standalone.lightMode')"
-            :extra="t('standalone.lightModeHint')"
-            ><a-switch v-model:checked="draft.LightMode" @change="changed"
           /></a-form-item>
           <a-form-item name="ActivityEnabled" :label="t('standalone.activityEnabled')"
             ><a-switch v-model:checked="draft.ActivityEnabled" @change="changed"
