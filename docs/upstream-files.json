@@ -125,18 +125,6 @@
       "standalone_sha256": "99c6fa069ed270566c348f8d9a949bae26da64a27941ee8778ee0d14c4ad9e1d"
     },
     {
-      "path": "frontend/src/views/gamesign/CommunityActivityView.vue",
-      "source": "frontend/src/views/gamesign/CommunityActivityView.vue",
-      "source_sha256": "4b22b898d7cd09a40751029d559180c92f956c24e8c750420531dabfb095d3a9",
-      "standalone_sha256": "862335f6a0a58001f921248da3b24f99c58716ed53af7d91049e1a86ed5e309e"
-    },
-    {
-      "path": "frontend/src/views/gamesign/communityActivityPresentation.ts",
-      "source": "frontend/src/views/gamesign/communityActivityPresentation.ts",
-      "source_sha256": "6c6f428970c5090d78be50cdab2ad8877597d34e4dc5b6433461ed3694fd09ef",
-      "standalone_sha256": "ccba3bfec83fcf95425c96ba2f4b122048f02290400ddbfcbd661bde56fe18b3"
-    },
-    {
       "path": "frontend/src/views/gamesign/QrLoginModal.vue",
       "source": "frontend/src/views/gamesign/QrLoginModal.vue",
       "source_sha256": "13fc18e018b6a9dad63af36a75bb1b98c10b2f1a0ef88cb75e2685b02f675b69",
@@ -147,18 +135,6 @@
       "source": "frontend/src/views/gamesign/useQrLogin.ts",
       "source_sha256": "66d587c4e193e45378df1ee46986daeca61074d07ed1ebc988fbffcc74035409",
       "standalone_sha256": "6c62a7804df5af65ebcf32b979c9aa34de33913c35ff2b2220734cd95e46d54a"
-    },
-    {
-      "path": "frontend/src/views/gamesign/components/CommunityActivityCard.vue",
-      "source": "frontend/src/views/gamesign/components/CommunityActivityCard.vue",
-      "source_sha256": "720a79a2259b87513c4048b4cb5874a8eb709b8853c224edbb56097494e9c918",
-      "standalone_sha256": "ea71a7d4b26578510a4663bd8f5f46567348cd2c5175c70c1ce8479c83785830"
-    },
-    {
-      "path": "frontend/src/views/gamesign/components/CommunityActivityMetric.vue",
-      "source": "frontend/src/views/gamesign/components/CommunityActivityMetric.vue",
-      "source_sha256": "55d60d47c416847ec22555e07fe05908db51d6b4d9bb3f01c75c22b0ad0c0b42",
-      "standalone_sha256": "e7bd900baeaef40a31e3b2eae77bc3198e4a9384f0a5274e78360c6616548755"
     },
     {
       "path": "frontend/src/views/gamesign/useQrLogin.test.ts",
@@ -197,14 +173,7 @@
       "source": "frontend/src/i18n/locales/zh-CN.ts",
       "extraction": "common and game community messages",
       "source_sha256": "6d799e444d5b2a017e9ac576b8e3e178dbe9f0b5f09d752b4282dc8cf3694272",
-      "standalone_sha256": "c3c25bc8778117b6351439948d1124db768bb4419a592bea3b31451f95975a89"
-    },
-    {
-      "path": "frontend/src/views/gamesign/components/community-activity-card.css",
-      "source": "frontend/src/views/gamesign/components/CommunityActivityCard.vue",
-      "extraction": "preserved component CSS with local accent default",
-      "source_sha256": "720a79a2259b87513c4048b4cb5874a8eb709b8853c224edbb56097494e9c918",
-      "standalone_sha256": "f9011946c871d863b6c1d0c679288cee32068498461f3f6fd9100709e7c7cf45"
+      "standalone_sha256": "941d59411686f6e69405c05549e102055dbb47654e935e9c1f20029fdca50dab"
     },
     {
       "path": "frontend/.oxfmtrc.json",
@@ -212,77 +181,6 @@
       "extraction": "format conventions adapted for standalone generated files",
       "source_sha256": "fb2ddc0000736630e0c8f2164259bb23995e287cbce91b008f434fa23a05196b",
       "standalone_sha256": "e98f0e98a0246c7a532cb7725962707c496ed2f2693a76a86e7d5dfe64e4a941"
-    },
-    {
-      "path": "frontend/src/assets/community-notes/arknights.png",
-      "source": "frontend/src/assets/community-notes/arknights.png",
-      "source_sha256": "d199206eb791ae9aafcf577edd4154caf272b95f3cf6a2b7d3be77c8c49be945",
-      "standalone_sha256": "d199206eb791ae9aafcf577edd4154caf272b95f3cf6a2b7d3be77c8c49be945"
-    },
-    {
-      "path": "frontend/src/assets/community-notes/arknights.webp",
-      "source": "frontend/src/assets/community-notes/arknights.png",
-      "extraction": "resized WebP derivative, source asset retained",
-      "source_sha256": "d199206eb791ae9aafcf577edd4154caf272b95f3cf6a2b7d3be77c8c49be945",
-      "standalone_sha256": "5e96588f4b9040407d286c1e9ccbc349abb81eef03270dc8aa00f5334ad6e1ab"
-    },
-    {
-      "path": "frontend/src/assets/community-notes/ATTRIBUTION.md",
-      "source": "frontend/src/assets/community-notes/ATTRIBUTION.md",
-      "source_sha256": "172c778a631edb36c8c4a8da19f3237979429f9441840fd39b0530e8932e81fc",
-      "standalone_sha256": "d7ae0f24c0c13811aa2b151cf714ed35a6230ccb593347bc7af33fe73f6cc213"
-    },
-    {
-      "path": "frontend/src/assets/community-notes/endfield.jpg",
-      "source": "frontend/src/assets/community-notes/endfield.jpg",
-      "source_sha256": "a102e1be9d342e354a69e0b0f70d398a0d9660703eb57522a67c0450d88e82f5",
-      "standalone_sha256": "a102e1be9d342e354a69e0b0f70d398a0d9660703eb57522a67c0450d88e82f5"
-    },
-    {
-      "path": "frontend/src/assets/community-notes/endfield.webp",
-      "source": "frontend/src/assets/community-notes/endfield.jpg",
-      "extraction": "resized WebP derivative, source asset retained",
-      "source_sha256": "a102e1be9d342e354a69e0b0f70d398a0d9660703eb57522a67c0450d88e82f5",
-      "standalone_sha256": "d0f78f8c982f293bba4ec6073cef4fb4ec70a976149b4dee79823f63b23e9368"
-    },
-    {
-      "path": "frontend/src/assets/community-notes/genshin.jpg",
-      "source": "frontend/src/assets/community-notes/genshin.jpg",
-      "source_sha256": "97fd3456fd760d47e3d446c1adfa2bb55d5743229ebb687c9b02240d711f7141",
-      "standalone_sha256": "97fd3456fd760d47e3d446c1adfa2bb55d5743229ebb687c9b02240d711f7141"
-    },
-    {
-      "path": "frontend/src/assets/community-notes/genshin.webp",
-      "source": "frontend/src/assets/community-notes/genshin.jpg",
-      "extraction": "resized WebP derivative, source asset retained",
-      "source_sha256": "97fd3456fd760d47e3d446c1adfa2bb55d5743229ebb687c9b02240d711f7141",
-      "standalone_sha256": "dd62fbde70ddc527c2905f7b67f414876e2e3d7710277a9cdc17d7366dc50b7c"
-    },
-    {
-      "path": "frontend/src/assets/community-notes/star-rail.jpg",
-      "source": "frontend/src/assets/community-notes/star-rail.jpg",
-      "source_sha256": "6f46bee741c79600dcdaaa037973743a87a65dee85dd538d6c68c07f6641bd5b",
-      "standalone_sha256": "6f46bee741c79600dcdaaa037973743a87a65dee85dd538d6c68c07f6641bd5b"
-    },
-    {
-      "path": "frontend/src/assets/community-notes/star-rail.webp",
-      "source": "frontend/src/assets/community-notes/star-rail.jpg",
-      "extraction": "resized WebP derivative, source asset retained",
-      "source_sha256": "6f46bee741c79600dcdaaa037973743a87a65dee85dd538d6c68c07f6641bd5b",
-      "standalone_sha256": "6f16103d22a2e0fcdcc3be662590f4401aa1272c073138e5dde3ea6b15e1e0e1"
-    },
-    {
-      "path": "frontend/src/assets/community-notes/zenless.jpg",
-      "source": "frontend/src/assets/community-notes/zenless.jpg",
-      "source_sha256": "defadbbcb2ac073cedb7e3cd5e7dd849722e9feb34db3f0cae82b75b11b9168b",
-      "standalone_sha256": "defadbbcb2ac073cedb7e3cd5e7dd849722e9feb34db3f0cae82b75b11b9168b"
-    },
-    {
-      "path": "frontend/src/assets/community-notes/zenless.webp",
-      "source": "frontend/src/assets/community-notes/zenless.jpg",
-      "extraction": "resized WebP derivative, source asset retained",
-      "source_sha256": "defadbbcb2ac073cedb7e3cd5e7dd849722e9feb34db3f0cae82b75b11b9168b",
-      "standalone_sha256": "62b1523b29b9e2d3158b742f0873ad083d73b37ef425bf4e5465d3585320bc62"
     }
   ],
   "attributed_files": [
@@ -290,35 +188,35 @@
       "path": "app/tools/akedata_client.py",
       "origin": "Billtranscend/Priestess-bot plugins/endfield_wiki/data.py",
       "license": "MIT（Copyright (c) 2026 Billtranscend，全文见 docs/licenses/Priestess-bot.txt）",
-      "standalone_sha256": "e9e68012d3671840189b389acd76a8ee59a2f2999b66832cfea17e332e07551a",
+      "standalone_sha256": "ba36da150c4aa3e64757f7384bf3f5c5854ca3833d82c88514d4999e148ecfdc",
       "note": "移植 manifest 与游戏表下载、紧凑索引构建，去掉 nonebot 依赖并改用本仓网络层，另拆出 dungeons/enemies 扁平表。"
     },
     {
       "path": "app/tools/endfield_lookup.py",
       "origin": "Billtranscend/Priestess-bot plugins/endfield_wiki/lookup.py",
       "license": "MIT（Copyright (c) 2026 Billtranscend，全文见 docs/licenses/Priestess-bot.txt）",
-      "standalone_sha256": "0785ea13c035eb297c7e33088857a1c6cd2926f4a463d5302acaaa75a027689d",
+      "standalone_sha256": "43ade041f5aa45097dc0890079edfa9e30d26863bb66fa8ccf5fab0ec3c7593b",
       "note": "逐条对照改写为纯解析模块：精确键、唯一前缀、同音字与近似纠错，pypinyin 改为可选导入。"
     },
     {
       "path": "app/tools/endfield_changes.py",
       "origin": "Billtranscend/Priestess-bot plugins/endfield_wiki/changes.py",
       "license": "MIT（Copyright (c) 2026 Billtranscend，全文见 docs/licenses/Priestess-bot.txt）",
-      "standalone_sha256": "297c46c9ae6b740630ec417a5274e7059fee6871252877fb4bba1bb0b523d710",
+      "standalone_sha256": "5d335edf352d6e459cf6f6d4b3fd28146ca3b959fdf3ae2d1bf122df3e7229e1",
       "note": "只保留版本差异与数据体检的纯函数结果，供 /api/wiki/sync 的 counts 与 problems 使用，未移植群通知。"
     },
     {
       "path": "app/tools/endfield_view.py",
       "origin": "Billtranscend/Priestess-bot plugins/endfield_wiki/lookup.py 与 aliases.json",
       "license": "MIT（Copyright (c) 2026 Billtranscend，全文见 docs/licenses/Priestess-bot.txt）",
-      "standalone_sha256": "280dd041627728b99d1c9d01f16ac95e467adbb0deb8953b9d5311af381e3c8e",
+      "standalone_sha256": "1b2eb9da2d351e9f3a6f0fb52390df504995af09e47dcc9f99b6651938272ee8",
       "note": "按前端通用渲染契约重写检索行与资料卡转换；匹配顺序与别名表沿用上游，非逐行移植。"
     },
     {
       "path": "app/tools/game_calendar_arknights.py",
       "origin": "Billtranscend/Priestess-bot plugins/game_calendar/arknights.py",
       "license": "MIT（Copyright (c) 2026 Billtranscend，全文见 docs/licenses/Priestess-bot.txt）",
-      "standalone_sha256": "91696ccc5b02085e0d650b2c9272eb601b19af94270b55a1fcf96021802f5458",
+      "standalone_sha256": "43dbad77eafcd0cc67de8ec8aca638ab594c1337031d7a395b63c18dfa0b03fd",
       "note": "移植游戏表拉取、缓存与日历行转换；上游的 PRTS 双源合并、横幅补齐与卡池配对未接入。"
     },
     {
@@ -332,7 +230,7 @@
       "path": "app/services/game_calendar.py",
       "origin": "无直接上游文件；明日方舟降级分支调用 Priestess-bot 的 arknights 日历移植（app/tools/game_calendar_arknights.py）",
       "license": "本文件 AGPL-3.0-or-later；所引用的 Priestess-bot 移植部分为 MIT",
-      "standalone_sha256": "42f8a40c77e6050fd1003da2d67f86e0a6a4c1b5c89ec5af0cfb71f1c9e9191b",
+      "standalone_sha256": "5d3af334f14804c159990f2e5bc1a91ee0a3da3b0448ffc4ab133814a7952bad",
       "note": "本机取数/缓存/契约行编排为独立实现，仅因文件头说明明日方舟来源而登记归属。"
     },
     {
