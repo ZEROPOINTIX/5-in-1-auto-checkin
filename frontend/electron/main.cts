@@ -1,4 +1,4 @@
-/** 签到小工具：独立窗口、独立数据、单实例及后端清理。 */
+/** 5in1autocheckin 1.0：独立窗口、独立数据、单实例及后端清理。 */
 import {
   app,
   BrowserWindow,
@@ -17,7 +17,7 @@ import { appendFileSync, mkdirSync, rmSync, writeFileSync } from 'node:fs'
 import { join, resolve } from 'node:path'
 import { BackendService } from './backend.cjs'
 
-const productName = '签到小工具'
+const productName = '5in1autocheckin 1.0'
 // 产品更名保留既有目录与应用 ID，保证原账号密文、单实例锁和快捷方式兼容。
 const dataDirectory = process.env.COMMUNITY_DATA_DIR
   ? resolve(process.env.COMMUNITY_DATA_DIR)
@@ -259,7 +259,7 @@ type JjjCredential = {
   channel?: JjjChannel
 }
 type JjjStep = { name: string; status: string; reward?: string; reason?: string }
-type JjjResponse = { code?: number | string; msg?: string; data?: any; success?: boolean }
+type JjjResponse = { code?: number | string; msg?: string; data?: unknown; success?: boolean }
 type JjjSignResult = {
   ok: boolean
   message: string
@@ -400,7 +400,8 @@ async function jjjGetPublicKey(): Promise<string> {
     signal: AbortSignal.timeout(10000),
   })
   const body = (await response.json()) as JjjResponse
-  const key = body.data && typeof body.data === 'object' ? String(body.data.key ?? '') : ''
+  const keyPayload = (body.data ?? {}) as { key?: unknown }
+  const key = typeof keyPayload.key === 'string' ? keyPayload.key : ''
   if (!key) throw new Error('皎皎角 RSA 公钥获取失败')
   jjjPublicKey = key
   return key
@@ -458,7 +459,7 @@ async function jjjRequest(
     // 与 dna-builder 的 TimeBasicResponse 一致：部分接口把 data 包成 JSON 字符串。
     if (typeof body.data === 'string') {
       try {
-        body.data = JSON.parse(body.data)
+        body.data = JSON.parse(body.data) as unknown
       } catch {
         /* 不是 JSON 就保留原文，由调用方判断 */
       }
@@ -523,41 +524,6 @@ function jjjH5Success(body: JjjResponse): boolean {
   return body.success === true || Number(body.code) === 200 || Number(body.code) === 0
 }
 
-async function jjjH5Request(
-  url: string,
-  payload: Record<string, string | number>,
-  credential: JjjCredential = {}
-): Promise<JjjResponse> {
-  const headers: Record<string, string> = {
-    ...JJJ_H5_HEADERS,
-    devCode: credential.devCode || jjjEnsureH5DeviceCode(),
-  }
-  if (credential.token) headers.token = credential.token
-  const body = new URLSearchParams(
-    Object.entries(payload).map(([key, value]) => [key, String(value)])
-  ).toString()
-  const response = await fetch(JJJ_BASE + url, {
-    method: 'POST',
-    headers,
-    body,
-    signal: AbortSignal.timeout(10000),
-  })
-  const text = await response.text()
-  try {
-    const parsed = JSON.parse(text) as JjjResponse
-    if (typeof parsed.data === 'string') {
-      try {
-        parsed.data = JSON.parse(parsed.data)
-      } catch {
-        /* 非 JSON 数据保持原文 */
-      }
-    }
-    return parsed
-  } catch {
-    return { code: -1, msg: `HTTP ${response.status}：响应不是 JSON` }
-  }
-}
-
 /* ---------------- 带签名的短信 / 登录通道 ---------------- *
  * 线上服务端对 user/getSmsCode、user/sdkLogin、user/signIn 等 signApiList
  * 接口强制校验 tn/sa 签名：缺签名一律回 code=10000「参数错误」，
@@ -601,7 +567,6 @@ function jjjH5SignString(params: Record<string, string>, appKey: string): string
 
 type JjjChannel = 'android' | 'ios' | 'h5'
 /** 短信实际走通的通道；登录必须复用同一通道，避免验证码跨通道不互通。 */
-let jjjSmsChannel: JjjChannel = 'android'
 /** 发短信时实际使用的设备码：登录要沿用同一个，服务端可能按「手机号+设备」找短信会话。 */
 let jjjSmsDevice = ''
 
@@ -648,7 +613,7 @@ async function jjjSignedRequest(
     const parsed = JSON.parse(text) as JjjResponse
     if (typeof parsed.data === 'string') {
       try {
-        parsed.data = JSON.parse(parsed.data)
+        parsed.data = JSON.parse(parsed.data) as unknown
       } catch {
         /* 非 JSON 数据保持原文 */
       }
@@ -786,7 +751,6 @@ async function jjjSendSms(
   const message = body.msg || '验证码发送失败'
   log(`[BMAT] 皎皎角短信(${channel})服务端响应：code=${body.code ?? '?'} msg=${message}`)
   if (jjjH5Success(body)) {
-    jjjSmsChannel = channel
     jjjSmsDevice = channelDevice
     log(
       `[BMAT] 皎皎角短信通道=${channel}，设备码长度=${channelDevice.length}（登录会沿用同一设备码）`
@@ -893,13 +857,13 @@ async function jjjSign(credential: JjjCredential): Promise<JjjSignResult> {
       active,
       true
     )
+    const refreshedToken = (refreshed.data ?? {}) as { token?: unknown }
     if (
       jjjIsSuccess(refreshed) &&
-      refreshed.data &&
-      typeof refreshed.data.token === 'string' &&
-      refreshed.data.token.trim().length > 10
+      typeof refreshedToken.token === 'string' &&
+      refreshedToken.token.trim().length > 10
     ) {
-      active.token = refreshed.data.token.trim()
+      active.token = refreshedToken.token.trim()
     }
   }
 

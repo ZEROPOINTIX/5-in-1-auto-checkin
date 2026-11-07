@@ -88,9 +88,6 @@ onBeforeUnmount(autoSave.dispose)
             :extra="t('standalone.glassEffectHint')"
             ><a-switch v-model:checked="draft.GlassEffect" @change="changed"
           /></a-form-item>
-          <a-form-item name="ActivityEnabled" :label="t('standalone.activityEnabled')"
-            ><a-switch v-model:checked="draft.ActivityEnabled" @change="changed"
-          /></a-form-item>
           <a-form-item
             name="Proxy"
             v-if="!isAndroidLocal"
@@ -165,9 +162,6 @@ onBeforeUnmount(autoSave.dispose)
             :extra="t('standalone.cloudPasswordHint')"
           >
             <a-input-password v-model:value="draft.CloudPassword" :disabled="!draft.CloudMode" autocomplete="new-password" @update:value="textChanged" @blur="textBlurred" />
-          </a-form-item>
-          <a-form-item name="RelayEnabled" :label="t('standalone.relay.settingsTitle')" :extra="t('standalone.relay.settingsHint')">
-            <a-switch v-model:checked="draft.RelayEnabled" :disabled="!draft.CloudMode" @change="changed" />
           </a-form-item>
         </a-tab-pane>
       </a-tabs>

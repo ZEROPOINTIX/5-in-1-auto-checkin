@@ -7,8 +7,6 @@ import type { AccountIdIn } from '../models/AccountIdIn';
 import type { AccountReorderIn } from '../models/AccountReorderIn';
 import type { AccountsOut } from '../models/AccountsOut';
 import type { AccountUpdateIn } from '../models/AccountUpdateIn';
-import type { ActivityQueryIn } from '../models/ActivityQueryIn';
-import type { CommunityActivityOut } from '../models/CommunityActivityOut';
 import type { OutBase } from '../models/OutBase';
 import type { QrCheckIn } from '../models/QrCheckIn';
 import type { QrCheckOut } from '../models/QrCheckOut';
@@ -151,25 +149,6 @@ export class CommunityService {
         return __request(OpenAPI, {
             method: 'POST',
             url: '/api/sign',
-        });
-    }
-    /**
-     * Query Activity
-     * @param requestBody
-     * @returns CommunityActivityOut Successful Response
-     * @throws ApiError
-     */
-    public static queryActivity(
-        requestBody: ActivityQueryIn,
-    ): CancelablePromise<CommunityActivityOut> {
-        return __request(OpenAPI, {
-            method: 'POST',
-            url: '/api/activity',
-            body: requestBody,
-            mediaType: 'application/json',
-            errors: {
-                422: `Validation Error`,
-            },
         });
     }
     /**

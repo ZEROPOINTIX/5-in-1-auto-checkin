@@ -8,15 +8,9 @@ import { useSettingsStore } from '@/stores/settings'
 import { useTheme } from '@/composables/useTheme'
 import { isAndroidLocal, markAndroidReady, retryAndroidEngine } from '@/services/android'
 import {
-  BookOutlined,
   CalendarOutlined,
-  ControlOutlined,
-  DashboardOutlined,
-  GiftOutlined,
   LinkOutlined,
   FileTextOutlined,
-  MenuOutlined,
-  ScheduleOutlined,
   SettingOutlined,
 } from '@ant-design/icons-vue'
 import zhCN from 'ant-design-vue/es/locale/zh_CN'
@@ -37,30 +31,9 @@ const startupStage = ref('')
 // 底部导航：游戏社区为主入口 + 系统工具；功能页在左侧可收起侧边栏。
 const mobileItems = computed(() => [
   { path: '/sign', label: t('standalone.sign'), icon: CalendarOutlined },
-  ...(settings.data?.CloudMode
-    ? [{ path: '/remote', label: t('standalone.remote'), icon: ControlOutlined }]
-    : []),
   { path: '/logs', label: t('standalone.logs'), icon: FileTextOutlined },
   { path: '/settings', label: t('standalone.settings'), icon: SettingOutlined },
 ])
-// 左侧可收起侧边栏：社区功能页菜单。
-const sideOpen = ref(false)
-const sideItems = computed(() => [
-  { path: '/sign', label: t('standalone.sign'), icon: CalendarOutlined },
-  ...(settings.data?.ActivityEnabled !== false
-    ? [{ path: '/activity', label: t('standalone.activity'), icon: DashboardOutlined }]
-    : []),
-  { path: '/gacha', label: t('standalone.gacha'), icon: GiftOutlined },
-  { path: '/wiki', label: t('standalone.wiki'), icon: BookOutlined },
-  { path: '/calendar', label: t('standalone.calendar'), icon: ScheduleOutlined },
-  ...(settings.data?.CloudMode
-    ? [{ path: '/remote', label: t('standalone.remote'), icon: ControlOutlined }]
-    : []),
-])
-const goSide = (item: { key: string | number }) => {
-  router.push(String(item.key))
-  sideOpen.value = false
-}
 const pageTitle = computed(() => {
   const meta = route.meta.title as string | undefined
   return meta ? t(meta) : t('standalone.sign')
@@ -132,28 +105,8 @@ onBeforeUnmount(() => {
               ><template #icon><CalendarOutlined /></template
               >{{ t('standalone.sign') }}</a-menu-item
             >
-            <a-menu-item v-if="settings.data?.ActivityEnabled !== false" key="/activity"
-              ><template #icon><DashboardOutlined /></template
-              >{{ t('standalone.activity') }}</a-menu-item
-            >
-            <a-menu-item key="/gacha"
-              ><template #icon><GiftOutlined /></template>{{ t('standalone.gacha') }}</a-menu-item
-            >
-            <a-menu-item key="/wiki"
-              ><template #icon><BookOutlined /></template>{{ t('standalone.wiki') }}</a-menu-item
-            >
-            <a-menu-item key="/calendar"
-              ><template #icon><ScheduleOutlined /></template>{{
-                t('standalone.calendar')
-              }}</a-menu-item
-            >
             <a-menu-item v-if="!isAndroidLocal" key="/mas"
               ><template #icon><LinkOutlined /></template>{{ t('standalone.mas') }}</a-menu-item
-            >
-            <a-menu-item v-if="settings.data?.CloudMode" key="/remote"
-              ><template #icon><ControlOutlined /></template>{{
-                t('standalone.remote')
-              }}</a-menu-item
             >
           </a-menu>
           <a-menu
@@ -174,14 +127,6 @@ onBeforeUnmount(() => {
         </nav>
         <a-layout-content class="app-content">
           <div v-if="isAndroidLocal && ready" class="android-topbar">
-            <button
-              class="android-hamburger"
-              type="button"
-              :aria-label="t('standalone.navigation')"
-              @click="sideOpen = true"
-            >
-              <MenuOutlined />
-            </button>
             <span class="android-page-title">{{ pageTitle }}</span>
           </div>
           <div v-if="!ready" class="page-state">
@@ -241,26 +186,6 @@ onBeforeUnmount(() => {
         </button>
       </nav>
     </a-layout>
-    <a-drawer
-      v-if="isAndroidLocal"
-      :open="sideOpen"
-      placement="left"
-      :title="t('standalone.title')"
-      :width="240"
-      class="android-side-drawer"
-      @close="sideOpen = false"
-    >
-      <a-menu
-        mode="inline"
-        :selected-keys="[route.path]"
-        class="android-side-menu"
-        @click="goSide"
-      >
-        <a-menu-item v-for="item in sideItems" :key="item.path">
-          <template #icon><component :is="item.icon" /></template>{{ item.label }}
-        </a-menu-item>
-      </a-menu>
-    </a-drawer>
   </a-config-provider>
 </template>
 

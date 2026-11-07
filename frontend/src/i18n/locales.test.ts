@@ -14,7 +14,7 @@ const SOURCE_ROOT = fileURLToPath(new URL('../', import.meta.url))
 const SOURCE_EXTENSIONS = ['.ts', '.vue']
 // 只认引用 `t()` 时以命名空间开头的字面量，避免把 CSS 类名、路径之类的点号字符串当成 key。
 const KEY_LITERAL = /['"`]([A-Za-z]\w*(?:\.\w+)+)['"`]/g
-// 模板拼接只校验到最后一个静态段：t(`standalone.gachaGames.${value}`) → standalone.gachaGames。
+// 模板拼接只校验到最后一个静态段：形如 t(standalone.xxx + 变量) 时只校验 standalone.xxx 前缀。
 const KEY_TEMPLATE_PREFIX = /`([A-Za-z]\w*(?:\.\w+)*)\.\$\{/g
 
 type Messages = Record<string, unknown>

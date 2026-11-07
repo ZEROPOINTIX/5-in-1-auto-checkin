@@ -15,42 +15,12 @@ export const router = createRouter({
       component: () => import('@/views/mas/index.vue'),
       meta: { title: 'standalone.mas' },
     },
-    {
-      path: '/wiki',
-      name: 'Wiki',
-      component: () => import('@/views/wiki/index.vue'),
-      meta: { title: 'standalone.wiki' },
-    },
-    {
-      path: '/calendar',
-      name: 'Calendar',
-      component: () => import('@/views/calendar/index.vue'),
-      meta: { title: 'standalone.calendar' },
-    },
-    {
-      path: '/gacha',
-      name: 'Gacha',
-      component: () => import('@/views/gacha/index.vue'),
-      meta: { title: 'standalone.gacha' },
-    },
     { path: '/', redirect: '/sign' },
     {
       path: '/sign',
       name: 'CommunitySign',
       component: () => import('@/views/gamesign/index.vue'),
       meta: { title: 'standalone.sign' },
-    },
-    {
-      path: '/activity',
-      name: 'CommunityActivity',
-      component: () => import('@/views/gamesign/CommunityActivityView.vue'),
-      meta: { title: 'standalone.activity' },
-    },
-    {
-      path: '/remote',
-      name: 'RemoteControl',
-      component: () => import('@/views/remote/index.vue'),
-      meta: { title: 'standalone.remote' },
     },
     {
       path: '/settings',
