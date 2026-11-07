@@ -17,17 +17,15 @@ from PIL import Image
 
 def verify(directory: Path) -> None:
     backend = directory / "resources/backend/community-backend.exe"
-    application = directory / "BetterMASTools.exe"
+    application = directory / "5in1autocheckin 1.0.exe"
     for path in (
         backend,
         application,
         directory / "resources/LICENSE",
         directory / "resources/NOTICE.md",
-        # extraResources 的其余条目：缺了不会崩，但界面、来源清单或便笺素材会静默缺失。
+        # extraResources 的其余条目：缺了不会崩，但界面或来源清单会静默缺失。
         directory / "resources/renderer/index.html",
         directory / "resources/docs/upstream-files.json",
-        directory / "resources/community-notes-ATTRIBUTION.md",
-        directory / "resources/community-notes-manifest.json",
     ):
         if not path.is_file():
             raise ValueError(f"发行包缺少文件：{path.name}")

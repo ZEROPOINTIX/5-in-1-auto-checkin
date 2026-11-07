@@ -23,6 +23,6 @@ module.exports = {
     ],
     requestedExecutionLevel: 'asInvoker',
   },
-  artifactName: 'BMT-${version}-windows-x64.${ext}',
+  artifactName: '5in1autocheckin-${version}-windows-x64.${ext}',
   publish: null,
 }

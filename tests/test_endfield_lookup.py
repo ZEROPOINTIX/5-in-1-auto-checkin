@@ -95,10 +95,11 @@ def test_fuzzy_match_corrects_a_typo():
 
 
 def test_to_pinyin_without_pypinyin_returns_nothing(monkeypatch):
+    imported_value = lookup.HOMOPHONE_AVAILABLE
     monkeypatch.setattr(lookup, "pinyin", None)
     assert lookup.to_pinyin("测试干员") == set()
     # 常量只反映导入时的结果，不受运行时替换影响。
-    assert lookup.HOMOPHONE_AVAILABLE == (lookup.pinyin is not None)
+    assert lookup.HOMOPHONE_AVAILABLE == imported_value
 
 
 def test_lookup_degrades_without_pypinyin(resolver, monkeypatch):
