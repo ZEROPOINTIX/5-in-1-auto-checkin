@@ -1,7 +1,16 @@
 /** 独立桌面后端生命周期；不读取或管理 AUTO-MAS 的服务。 */
 import { spawn, type ChildProcessWithoutNullStreams } from 'node:child_process'
-import { existsSync } from 'node:fs'
+import { existsSync, readFileSync, writeFileSync } from 'node:fs'
+import { createServer } from 'node:net'
 import { join } from 'node:path'
+
+/**
+ * 首选端口。原先固定用 `--port 0` 让系统随机分配，结果每次重启 origin 都变，
+ * 渲染进程按 origin 隔离的 localStorage 随之失效（皎皎角凭据正因此每次重启丢失）。
+ * 这里改成「记住用过的端口」，让 origin 长期稳定。
+ */
+const DEFAULT_PORT = 47821
+const PORT_FILE = 'desktop-port.txt'
 
 interface BackendOptions {
   packaged: boolean
@@ -9,6 +18,43 @@ interface BackendOptions {
   resourcesPath: string
   dataDirectory: string
   onUnexpectedExit: () => void
+}
+
+/** 端口是否可用：能 bind 成功说明没被占用。 */
+function isPortFree(port: number): Promise<boolean> {
+  return new Promise(resolve => {
+    const probe = createServer()
+    probe.once('error', () => resolve(false))
+    probe.once('listening', () => probe.close(() => resolve(true)))
+    probe.listen(port, '127.0.0.1')
+  })
+}
+
+function readRememberedPort(dataDirectory: string): number {
+  try {
+    const value = Number(readFileSync(join(dataDirectory, PORT_FILE), 'utf8').trim())
+    return Number.isInteger(value) && value > 1024 && value < 65536 ? value : DEFAULT_PORT
+  } catch {
+    return DEFAULT_PORT
+  }
+}
+
+function rememberPort(dataDirectory: string, port: number): void {
+  try {
+    writeFileSync(join(dataDirectory, PORT_FILE), String(port))
+  } catch {
+    // 记录失败只影响下次可能换端口，不影响本次运行。
+  }
+}
+
+/** 优先复用上次端口；被占用时顺延探测，全都不可用才退回系统分配。 */
+async function pickPort(dataDirectory: string): Promise<number> {
+  const preferred = readRememberedPort(dataDirectory)
+  for (let offset = 0; offset < 12; offset += 1) {
+    const candidate = preferred + offset
+    if (candidate < 65536 && (await isPortFree(candidate))) return candidate
+  }
+  return 0
 }
 
 export class BackendService {
@@ -30,7 +76,8 @@ export class BackendService {
       throw new Error('运行文件不完整，请重新构建或解压完整的桌面程序目录。')
     }
     const arguments_ = options.packaged ? [] : [join(options.projectRoot, 'main.py')]
-    this.child = spawn(executable, [...arguments_, '--desktop', '--port', '0'], {
+    const requestedPort = await pickPort(options.dataDirectory)
+    this.child = spawn(executable, [...arguments_, '--desktop', '--port', String(requestedPort)], {
       cwd: options.packaged ? join(options.resourcesPath, 'backend') : options.projectRoot,
       windowsHide: true,
       stdio: 'pipe',
@@ -88,6 +135,8 @@ export class BackendService {
     ) {
       throw new Error('本地服务校验失败，请重新启动程序。')
     }
+    // 校验通过才记住端口，避免把起不来的端口写进记录，导致下次继续踩坑。
+    rememberPort(options.dataDirectory, port)
     child.once('exit', () => {
       if (!this.stopping) options.onUnexpectedExit()
     })

@@ -13,6 +13,7 @@ import {
   jjjAvailable,
   jjjConfigured,
   jjjToSignAccount,
+  loadJjjCredentials,
   readJjjCredentials,
   readJjjResults,
   writeJjjCredential,
@@ -62,7 +63,7 @@ const load = async () => {
     if (!alive) return
     accounts.value = accountResponse.data
     status.value = statusResponse
-    jjjCreds.value = readJjjCredentials()
+    jjjCreds.value = await loadJjjCredentials()
     jjjResults.value = readJjjResults(today.value)
   } catch (cause) {
     error.value = errorMessage(cause, t('standalone.loadFailed'))

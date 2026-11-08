@@ -11,7 +11,7 @@ import JjjSmsLoginModal from '../JjjSmsLoginModal.vue'
 import { useQrLogin, type QrLoginProvider } from '../useQrLogin'
 import {
   jjjAvailable,
-  readJjjCredentials,
+  loadJjjCredentials,
   writeJjjCredential,
   type JjjCredential,
   type JjjWebLoginResult,
@@ -45,16 +45,21 @@ const dirty = computed(
 
 watch(
   () => [props.open, props.account?.uid],
-  () => {
+  async () => {
     if (props.open && props.account) {
+      const uid = props.account.uid
       draft.value = { ...props.account.data }
       baseline.value = JSON.stringify(draft.value)
-      const saved = readJjjCredentials()[props.account.uid] || {}
-      jjjDraft.token = saved.token || ''
-      jjjDraft.devCode = saved.devCode || ''
-      jjjDraft.refreshToken = saved.refreshToken || ''
-      jjjDraft.channel = saved.channel
-      jjjBaseline.value = jjjSnapshot()
+      // 凭据来自主进程文件，首次用到时要等载入完成（之后走内存缓存，立即返回）。
+      const saved = (await loadJjjCredentials())[uid] || {}
+      // 等待期间若已切到别的账号，就不能把上一个账号的凭据填进来。
+      if (props.open && props.account?.uid === uid) {
+        jjjDraft.token = saved.token || ''
+        jjjDraft.devCode = saved.devCode || ''
+        jjjDraft.refreshToken = saved.refreshToken || ''
+        jjjDraft.channel = saved.channel
+        jjjBaseline.value = jjjSnapshot()
+      }
     }
     // 切换账号或关窗时复位短信登录弹窗，否则给另一个账号重开编辑会沿用它上次的打开状态。
     kuroOpen.value = false

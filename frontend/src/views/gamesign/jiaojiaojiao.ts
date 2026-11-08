@@ -53,6 +53,10 @@ declare global {
         channel?: JjjChannel
       }) => Promise<JjjLoginResult>
       captchaId: (channel?: 'android' | 'ios' | 'h5') => Promise<string>
+      /** 从主进程文件读取全部凭据（不依赖窗口 origin）。 */
+      loadCredentials?: () => Promise<Record<string, JjjCredential>>
+      /** 整体写回主进程文件；主进程负责加密与落盘。 */
+      saveCredentials?: (value: Record<string, JjjCredential>) => Promise<{ ok: boolean }>
       startWebLogin: () => Promise<{ ok: boolean; message: string }>
       cancelWebLogin: () => Promise<{ ok: boolean }>
       setWebLoginListener: ((callback: ((payload: unknown) => void) | null) => void)
@@ -80,17 +84,84 @@ const RESULT_KEY = 'bmat-jjj-last-results'
 
 export const jjjAvailable = () => typeof window !== 'undefined' && !!window.bmatJjj
 
-export function readJjjCredentials(): Record<string, JjjCredential> {
+/**
+ * 凭据的内存副本。主进程文件是唯一可信来源，这里只是给同步读接口做缓存。
+ *
+ * 历史缺陷（2026-11-08 定位并修复）：凭据原先存在 localStorage，而窗口加载的是
+ * `http://127.0.0.1:<端口>`，后端以 `--port 0` 启动、每次随机取空闲端口。localStorage
+ * 按 origin 隔离，端口一变就是一套全新的空存储，旧凭据留在上一个原始源里读不到——
+ * 表现即「每次重启掉登录」。改存主进程文件后与 origin 无关。
+ */
+let credentialCache: Record<string, JjjCredential> | null = null
+
+function normalizeCredentials(raw: unknown): Record<string, JjjCredential> {
+  if (!raw || typeof raw !== 'object' || Array.isArray(raw)) return {}
+  const out: Record<string, JjjCredential> = {}
+  for (const [uid, value] of Object.entries(raw as Record<string, unknown>)) {
+    if (!value || typeof value !== 'object') continue
+    const item = value as Record<string, unknown>
+    const token = typeof item.token === 'string' ? item.token.trim() : ''
+    if (!token) continue
+    const channel = item.channel
+    out[uid] = {
+      token,
+      devCode: typeof item.devCode === 'string' ? item.devCode.trim() : '',
+      refreshToken: typeof item.refreshToken === 'string' ? item.refreshToken.trim() : '',
+      ...(channel === 'android' || channel === 'ios' || channel === 'h5' ? { channel } : {}),
+    }
+  }
+  return out
+}
+
+/** 旧版本写在 localStorage 里的凭据；仅在缺少主进程桥（浏览器预览）时兜底。 */
+function readLegacyCredentials(): Record<string, JjjCredential> {
   try {
-    const parsed = JSON.parse(localStorage.getItem(CREDENTIAL_KEY) || '{}')
-    return parsed && typeof parsed === 'object' ? (parsed as Record<string, JjjCredential>) : {}
+    return normalizeCredentials(JSON.parse(localStorage.getItem(CREDENTIAL_KEY) || '{}'))
   } catch {
     return {}
   }
 }
 
+/**
+ * 从主进程载入凭据并填充缓存。渲染首屏前必须 await 一次，否则
+ * readJjjCredentials() 返回空对象，账号会被误判成「未登录」。
+ */
+export async function loadJjjCredentials(): Promise<Record<string, JjjCredential>> {
+  if (credentialCache) return credentialCache
+  const bridge = window.bmatJjj
+  if (!bridge?.loadCredentials) {
+    credentialCache = readLegacyCredentials()
+    return credentialCache
+  }
+  try {
+    credentialCache = normalizeCredentials(await bridge.loadCredentials())
+  } catch {
+    credentialCache = {}
+  }
+  return credentialCache
+}
+
+/** 同步读缓存。载入完成前是空对象，调用方应先 await loadJjjCredentials()。 */
+export function readJjjCredentials(): Record<string, JjjCredential> {
+  return credentialCache ?? {}
+}
+
+function persistCredentials(all: Record<string, JjjCredential>): void {
+  const bridge = window.bmatJjj
+  if (!bridge?.saveCredentials) {
+    try {
+      localStorage.setItem(CREDENTIAL_KEY, JSON.stringify(all))
+    } catch {
+      // 配额用尽或隐私模式下忽略：内存缓存本次会话仍然有效。
+    }
+    return
+  }
+  // 落盘异步进行，失败由主进程记日志，界面不阻塞等待。
+  void bridge.saveCredentials(all).catch(() => undefined)
+}
+
 export function writeJjjCredential(uid: string, credential: JjjCredential): void {
-  const all = readJjjCredentials()
+  const all = { ...readJjjCredentials() }
   if (!credential.token.trim()) delete all[uid]
   else {
     all[uid] = {
@@ -100,7 +171,8 @@ export function writeJjjCredential(uid: string, credential: JjjCredential): void
       ...(credential.channel ? { channel: credential.channel } : {}),
     }
   }
-  localStorage.setItem(CREDENTIAL_KEY, JSON.stringify(all))
+  credentialCache = all
+  persistCredentials(all)
 }
 
 export function jjjConfigured(uid: string, credentials: Record<string, JjjCredential>): boolean {

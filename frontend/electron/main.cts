@@ -6,6 +6,7 @@ import {
   ipcMain,
   Menu,
   nativeTheme,
+  safeStorage,
   screen,
   session,
   shell,
@@ -13,7 +14,7 @@ import {
   type WebContents,
 } from 'electron'
 import { constants, createHash, publicEncrypt, randomBytes } from 'node:crypto'
-import { appendFileSync, mkdirSync, rmSync, writeFileSync } from 'node:fs'
+import { appendFileSync, existsSync, mkdirSync, readFileSync, rmSync, writeFileSync } from 'node:fs'
 import { join, resolve } from 'node:path'
 import { BackendService } from './backend.cjs'
 
@@ -684,6 +685,57 @@ function jjjFailure(prefix: string): JjjLoginResult {
     appSession: false,
   }
 }
+
+/**
+ * 皎皎角凭据的落盘存储。
+ *
+ * 曾经的缺陷（2026-11-08 定位）：凭据只存在渲染进程的 localStorage 里。窗口加载的是
+ * `http://127.0.0.1:<端口>`，而后端以 `--port 0` 启动、每次随机取空闲端口，因此每次
+ * 重启 origin 都不同；localStorage 按 origin 隔离，旧凭据留在上一个原始源的命名空间里
+ * 永远读不到，表现就是「每次重启掉登录」。
+ *
+ * 现在改为由主进程写入用户数据目录，与端口、渲染进程缓存彻底无关；Windows 上经
+ * DPAPI 加密，只有当前 Windows 账户能解开。
+ */
+const jjjCredentialFile = join(dataDirectory, 'jjj-credentials.bin')
+
+function jjjReadCredentialFile(): Record<string, unknown> {
+  try {
+    if (!existsSync(jjjCredentialFile)) return {}
+    const raw = readFileSync(jjjCredentialFile)
+    const text = safeStorage.isEncryptionAvailable()
+      ? safeStorage.decryptString(raw)
+      : raw.toString('utf8')
+    const parsed: unknown = JSON.parse(text)
+    return parsed && typeof parsed === 'object' && !Array.isArray(parsed)
+      ? (parsed as Record<string, unknown>)
+      : {}
+  } catch (error) {
+    // 密文损坏或换了 Windows 账户都会解密失败，按「无凭据」处理，让用户重新登录。
+    log(`[BMAT] 皎皎角凭据读取失败，按未登录处理：${jjjError(error)}`)
+    return {}
+  }
+}
+
+function jjjWriteCredentialFile(value: Record<string, unknown>): boolean {
+  try {
+    const text = JSON.stringify(value)
+    const data = safeStorage.isEncryptionAvailable()
+      ? safeStorage.encryptString(text)
+      : Buffer.from(text, 'utf8')
+    writeFileSync(jjjCredentialFile, data)
+    return true
+  } catch (error) {
+    log(`[BMAT] 皎皎角凭据写入失败：${jjjError(error)}`)
+    return false
+  }
+}
+
+handleTrusted('bmat-jjj-credentials-load', async () => jjjReadCredentialFile())
+handleTrusted('bmat-jjj-credentials-save', async (_event, value?: unknown) => {
+  if (!value || typeof value !== 'object' || Array.isArray(value)) return { ok: false }
+  return { ok: jjjWriteCredentialFile(value as Record<string, unknown>) }
+})
 
 /** 从官网 /user/sdkLogin 的 data 中提取凭据，兼容不同大小写与嵌套。 */
 function jjjCredentialFromData(data: unknown, devCode: string): JjjLoginResult {

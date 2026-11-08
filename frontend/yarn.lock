@@ -5,6 +5,35 @@ __metadata:
   version: 8
   cacheKey: 10c0
 
+"5in1autocheckin-frontend@workspace:.":
+  version: 0.0.0-use.local
+  resolution: "5in1autocheckin-frontend@workspace:."
+  dependencies:
+    "@ant-design/icons-vue": "npm:^7.0.1"
+    "@types/node": "npm:22.17.1"
+    "@types/qrcode": "npm:1.5.5"
+    "@vitejs/plugin-vue": "npm:^6.0.1"
+    "@vue/tsconfig": "npm:^0.7.0"
+    ant-design-vue: "npm:4.x"
+    axios: "npm:1.15.2"
+    electron: "npm:^37.2.5"
+    electron-builder: "npm:26.8.1"
+    openapi-typescript-codegen: "npm:^0.29.0"
+    oxfmt: "npm:^0.42.0"
+    oxlint: "npm:^1.56.0"
+    pinia: "npm:^3.0.3"
+    qrcode: "npm:^1.5.4"
+    typescript: "npm:^5.9.2"
+    vite: "npm:^7.0.4"
+    vitest: "npm:^4.1.9"
+    vue: "npm:^3.5.17"
+    vue-i18n: "npm:^11.4.10"
+    vue-router: "npm:4"
+    vue-tsc: "npm:^2.2.12"
+    vuedraggable: "npm:^4.1.0"
+  languageName: unknown
+  linkType: soft
+
 "7zip-bin@npm:~5.2.0":
   version: 5.2.0
   resolution: "7zip-bin@npm:5.2.0"
@@ -1855,35 +1884,6 @@ __metadata:
   checksum: 10c0/f23823513b63173a001030fae4f2dabe283b99a9d324ade3ad3d148e218134676f1ee8568c877cd79ec1c53158dcf2d2ba527a97c606618928ba99dd930102bf
   languageName: node
   linkType: hard
-
-"5in1autocheckin-frontend@workspace:.":
-  version: 0.0.0-use.local
-  resolution: "5in1autocheckin-frontend@workspace:."
-  dependencies:
-    "@ant-design/icons-vue": "npm:^7.0.1"
-    "@types/node": "npm:22.17.1"
-    "@types/qrcode": "npm:1.5.5"
-    "@vitejs/plugin-vue": "npm:^6.0.1"
-    "@vue/tsconfig": "npm:^0.7.0"
-    ant-design-vue: "npm:4.x"
-    axios: "npm:1.15.2"
-    electron: "npm:^37.2.5"
-    electron-builder: "npm:26.8.1"
-    openapi-typescript-codegen: "npm:^0.29.0"
-    oxfmt: "npm:^0.42.0"
-    oxlint: "npm:^1.56.0"
-    pinia: "npm:^3.0.3"
-    qrcode: "npm:^1.5.4"
-    typescript: "npm:^5.9.2"
-    vite: "npm:^7.0.4"
-    vitest: "npm:^4.1.9"
-    vue: "npm:^3.5.17"
-    vue-i18n: "npm:^11.4.10"
-    vue-router: "npm:4"
-    vue-tsc: "npm:^2.2.12"
-    vuedraggable: "npm:^4.1.0"
-  languageName: unknown
-  linkType: soft
 
 "birpc@npm:^2.3.0":
   version: 2.9.0
