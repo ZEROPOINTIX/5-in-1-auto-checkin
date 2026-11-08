@@ -2,7 +2,7 @@
   "name": "5in1autocheckin-frontend",
   "private": true,
   "type": "module",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "5in1autocheckin 1.0 独立前端",
   "license": "AGPL-3.0-or-later",
   "packageManager": "yarn@4.9.1",

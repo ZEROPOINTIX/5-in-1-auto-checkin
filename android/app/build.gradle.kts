@@ -10,8 +10,8 @@ android {
         applicationId = "io.github.lance0174.bmat"
         minSdk = 29
         targetSdk = 35
-        versionCode = 100009
-        versionName = "1.0.0"
+        versionCode = 100019
+        versionName = "1.0.1"
     }
 
     buildFeatures { buildConfig = true }
